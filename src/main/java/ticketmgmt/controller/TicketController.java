@@ -1,41 +1,48 @@
 package ticketmgmt.controller;
 
-import org.apache.coyote.Response;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ticketmgmt.model.Ticket;
+import ticketmgmt.model.TicketPriority;
 import ticketmgmt.service.TicketService;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/tickets")
+@RequiredArgsConstructor
 public class TicketController {
-    @Autowired
-    private TicketService ticketService;
 
+    private final TicketService ticketService;
 
-    @PostMapping
-    public ResponseEntity<Ticket> createTicket(@RequestBody Ticket ticket) {
-        Ticket createdTicket = ticketService.createTicket(ticket.getCustomerName(), ticket.getIssueDescription());
-        return ResponseEntity.ok(createdTicket);
+    @PostMapping("/create")
+    public ResponseEntity<Ticket> createTicket(@RequestParam String customerName,
+                                               @RequestParam String issue,
+                                               @RequestParam TicketPriority priority) {
+        Ticket created = ticketService.createTicket(customerName, issue, priority);
+        return ResponseEntity.ok(created);
     }
 
-    @GetMapping
-    public ResponseEntity<Ticket> getAllTickets() {
-        return ResponseEntity.status(HttpStatus.OK).header();
+    @GetMapping("/{id}")
+    public ResponseEntity<Ticket> getTicket(@PathVariable Integer id) {
+        Optional<Ticket> ticket = ticketService.getTicketById(id);
+        return ticket.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("")
-    public ResponseEntity<Ticket> getTicketById(int id) {
-        return ticketService.findTicketById(id);
+    @PostMapping("/{id}/assign/{engineerId}")
+    public ResponseEntity<Ticket> assign(@PathVariable Integer id, @PathVariable Integer engineerId) {
+        return ResponseEntity.ok(ticketService.assignTicketToEngineer(id, engineerId));
     }
 
-    @PostMapping("")
-    public void acknowledgeTicket(Ticket ticket) {
-        ticketService.acknowledgeTicket(ticket);
+    @PostMapping("/{id}/unassign")
+    public ResponseEntity<Ticket> unassign(@PathVariable Integer id) {
+        return ResponseEntity.ok(ticketService.unassignEngineer(id));
     }
 
-    public Response<>
+    @GetMapping("/all")
+    public ResponseEntity<List<Ticket>> getAllTickets() {
+        return ResponseEntity.ok(ticketService.getAllTickets());
+    }
 }
-

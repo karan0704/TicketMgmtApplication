@@ -1,0 +1,937 @@
+
+
+--- File: pom.xml ---
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.3</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>ticketmgmt</groupId>
+    <artifactId>ticketmgmt</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>TicketMgmtApplication</name>
+    <description>TicketMgmtApplication</description>
+    <url/>
+    <licenses>
+        <license/>
+    </licenses>
+    <developers>
+        <developer/>
+    </developers>
+    <scm>
+        <connection/>
+        <developerConnection/>
+        <tag/>
+        <url/>
+    </scm>
+    <properties>
+        <java.version>17</java.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.30</version>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
+
+
+--- File: spring_project_dump.txt ---
+
+
+--- File: .idea\compiler.xml ---
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="ticketmgmt" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="ticketmgmt" options="-parameters" />
+    </option>
+  </component>
+</project>
+
+--- File: .idea\encodings.xml ---
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
+  </component>
+</project>
+
+--- File: .idea\jarRepositories.xml ---
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RemoteRepositoriesConfiguration">
+    <remote-repository>
+      <option name="id" value="central" />
+      <option name="name" value="Central Repository" />
+      <option name="url" value="https://repo.maven.apache.org/maven2" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="central" />
+      <option name="name" value="Maven Central repository" />
+      <option name="url" value="https://repo1.maven.org/maven2" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="jboss.community" />
+      <option name="name" value="JBoss Community repository" />
+      <option name="url" value="https://repository.jboss.org/nexus/content/repositories/public/" />
+    </remote-repository>
+  </component>
+</project>
+
+--- File: .idea\misc.xml ---
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/pom.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_21" project-jdk-name="ms-21" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+</project>
+
+--- File: .idea\vcs.xml ---
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+  </component>
+</project>
+
+--- File: .idea\workspace.xml ---
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="ca5774dd-a657-4795-84ac-acaf3974fa56" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ticketmgmt/TicketMgmtApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ticketmgmt/TicketMgmtApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ticketmgmt/controller/TicketController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ticketmgmt/controller/TicketController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ticketmgmt/model/IssueAttachment.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ticketmgmt/model/IssueAttachment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ticketmgmt/model/Ticket.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ticketmgmt/model/Ticket.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ticketmgmt/model/TicketStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ticketmgmt/model/TicketStatus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ticketmgmt/repository/TicketRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ticketmgmt/repository/TicketRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ticketmgmt/service/TicketService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ticketmgmt/service/TicketService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;karan0704&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/karan0704/TicketMgmtApplication.git&quot;,
+    &quot;accountId&quot;: &quot;54636cc6-44ce-4c2a-8924-892395f41c9f&quot;
+  }
+}</component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="2zMhjH5AYA6V1gi0w7kUrc0iRUc" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Spring Boot.TicketMgmtApplication (1).executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.TicketMgmtApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.projectsettings.compiler.javacompiler&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Learning Projects\TicketMgmtApplication\src\main\java\ticketmgmt\model" />
+      <recent name="D:\Learning Projects\TicketMgmtApplication\src\main\java\ticketmgmt\repository" />
+      <recent name="D:\Learning Projects\TicketMgmtApplication\src\main\java\ticketmgmt\controller" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Spring Boot.TicketMgmtApplication (1)">
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="TicketMgmtApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="TicketMgmtApplication" />
+      <option name="filePath" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TicketMgmtApplication (1)" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="ticketmgmt" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="ticketmgmt.TicketMgmtApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TicketMgmtApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="ticketmgmt" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="ticketmgmt.ticketmgmt.TicketMgmtApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.26927.53" />
+        <option value="bundled-js-predefined-d6986cc7102b-09060db00ec0-JavaScript-IU-251.26927.53" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="ca5774dd-a657-4795-84ac-acaf3974fa56" name="Changes" comment="" />
+      <created>1751546983434</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1751546983434</updated>
+      <workItem from="1751546984813" duration="910000" />
+      <workItem from="1751601278863" duration="1075000" />
+      <workItem from="1751602375317" duration="572000" />
+      <workItem from="1751602971005" duration="546000" />
+      <workItem from="1751608019817" duration="7187000" />
+      <workItem from="1751618336482" duration="286000" />
+      <workItem from="1751618640688" duration="351000" />
+      <workItem from="1751619012035" duration="40000" />
+      <workItem from="1751619092285" duration="10000" />
+      <workItem from="1751619117855" duration="1863000" />
+      <workItem from="1751621015219" duration="5605000" />
+      <workItem from="1751626948876" duration="1558000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
+
+--- File: .mvn\wrapper\maven-wrapper.properties ---
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+wrapperVersion=3.3.2
+distributionType=only-script
+distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.10/apache-maven-3.9.10-bin.zip
+
+
+--- File: src\main\java\ticketmgmt\TicketMgmtApplication.java ---
+package ticketmgmt;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class TicketMgmtApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(TicketMgmtApplication.class, args);
+    }
+
+}
+
+
+--- File: src\main\java\ticketmgmt\config\CorsConfig.java ---
+package ticketmgmt.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class CorsConfig {
+
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**")
+                        // IMPORTANT: Added "http://localhost:8000" to allow your Python server frontend
+                        // "null" is also included for direct file system access, though http.server is better
+                        .allowedOrigins("http://localhost:4200", "http://localhost:8000", "null")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*");
+            }
+        };
+    }
+}
+
+--- File: src\main\java\ticketmgmt\controller\EngineerController.java ---
+package ticketmgmt.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import ticketmgmt.model.Engineer;
+import ticketmgmt.repository.EngineerRepository; // Make sure this import is correct
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/engineers")
+@RequiredArgsConstructor
+public class EngineerController {
+
+    private final EngineerRepository engineerRepository; // Inject EngineerRepository
+
+    @GetMapping
+    public ResponseEntity<List<Engineer>> getAllEngineers() {
+        // This endpoint will return all engineers from the database
+        return ResponseEntity.ok(engineerRepository.findAll());
+    }
+
+    // Optional: Add an endpoint to create engineers for testing
+    @PostMapping
+    public ResponseEntity<Engineer> createEngineer(@RequestBody Engineer engineer) {
+        return ResponseEntity.ok(engineerRepository.save(engineer));
+    }
+}
+    
+
+--- File: src\main\java\ticketmgmt\controller\FileUploadController.java ---
+package ticketmgmt.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import ticketmgmt.service.FileStorageService;
+
+@RestController
+@RequestMapping("/api/files")
+@RequiredArgsConstructor
+public class FileUploadController {
+
+    private final FileStorageService fileStorageService;
+
+    @PostMapping("/upload")
+    public ResponseEntity<String> upload(@RequestParam MultipartFile file) {
+        try {
+            String path = fileStorageService.saveFile(file);
+            return ResponseEntity.ok("File saved at: " + path);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to upload file");
+        }
+    }
+}
+
+
+--- File: src\main\java\ticketmgmt\controller\TicketController.java ---
+package ticketmgmt.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import ticketmgmt.model.Ticket;
+import ticketmgmt.model.TicketPriority;
+import ticketmgmt.service.TicketService;
+
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/api/tickets")
+@RequiredArgsConstructor
+public class TicketController {
+
+    private final TicketService ticketService;
+
+    @PostMapping("/create")
+    public ResponseEntity<Ticket> createTicket(@RequestParam String customerName,
+                                               @RequestParam String issue,
+                                               @RequestParam TicketPriority priority) {
+        Ticket created = ticketService.createTicket(customerName, issue, priority);
+        return ResponseEntity.ok(created);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Ticket> getTicket(@PathVariable Integer id) {
+        Optional<Ticket> ticket = ticketService.getTicketById(id);
+        return ticket.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{id}/assign/{engineerId}")
+    public ResponseEntity<Ticket> assign(@PathVariable Integer id, @PathVariable Integer engineerId) {
+        return ResponseEntity.ok(ticketService.assignTicketToEngineer(id, engineerId));
+    }
+
+    @PostMapping("/{id}/unassign")
+    public ResponseEntity<Ticket> unassign(@PathVariable Integer id) {
+        return ResponseEntity.ok(ticketService.unassignEngineer(id));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<Ticket>> getAllTickets() {
+        return ResponseEntity.ok(ticketService.getAllTickets());
+    }
+}
+
+
+--- File: src\main\java\ticketmgmt\model\AuditLog.java ---
+package ticketmgmt.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class AuditLog {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private String message;
+    private LocalDateTime timestamp;
+
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "ticket_id")
+    private Ticket ticket;
+}
+
+
+--- File: src\main\java\ticketmgmt\model\Customer.java ---
+package ticketmgmt.model;
+
+import jakarta.persistence.*;
+import lombok.*;
+import java.util.List;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Customer {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private String name;
+    private String email;
+    private String phoneNumber;
+    private String companyName;
+
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+    private List<Ticket> tickets;
+}
+
+
+--- File: src\main\java\ticketmgmt\model\Engineer.java ---
+package ticketmgmt.model;
+
+import jakarta.persistence.*;
+import lombok.*;
+import java.util.List;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Engineer {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private String name;
+    private String email;
+    private String designation;
+
+    @OneToMany(mappedBy = "assignedEngineer", cascade = CascadeType.ALL)
+    private List<Ticket> assignedTickets;
+}
+
+
+--- File: src\main\java\ticketmgmt\model\IssueAttachment.java ---
+package ticketmgmt.model;
+
+import jakarta.persistence.*;
+        import lombok.*;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class IssueAttachment {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private String fileName;
+    private String filePath;
+
+    @ManyToOne
+    @JoinColumn(name = "ticket_id")
+    private Ticket ticket;
+}
+
+
+--- File: src\main\java\ticketmgmt\model\LogFile.java ---
+package ticketmgmt.model;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+
+public class LogFile {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private String filename;
+    private String filePath;
+
+    @ManyToOne
+    @JoinColumn(name = "ticket_id")
+    private Ticket ticket;
+}
+
+
+--- File: src\main\java\ticketmgmt\model\Ticket.java ---
+package ticketmgmt.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.*;
+import java.util.List;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+
+public class Ticket {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private String customerName;
+    private String issueDescription;
+
+    @Enumerated(EnumType.STRING)
+    private TicketStatus ticketStatus;
+
+    @Enumerated(EnumType.STRING)
+    private TicketPriority priority;
+
+    private String ticketResponse;
+
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LogFile> logFiles;
+
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AuditLog> auditLogs;
+
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
+
+    @ManyToOne
+    @JoinColumn(name = "engineer_id")
+    private Engineer assignedEngineer;
+}
+
+
+--- File: src\main\java\ticketmgmt\model\TicketPriority.java ---
+package ticketmgmt.model;
+
+public enum TicketPriority {
+    LOW, MEDIUM, HIGH, CRITICAL
+}
+
+
+--- File: src\main\java\ticketmgmt\model\TicketStatus.java ---
+package ticketmgmt.model;
+
+public enum TicketStatus {
+    OPEN, ACKNOWLEDGED, CLOSED
+}
+
+
+--- File: src\main\java\ticketmgmt\repository\AuditLogRepository.java ---
+package ticketmgmt.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import ticketmgmt.model.AuditLog;
+
+public interface AuditLogRepository extends JpaRepository<AuditLog, Integer> {
+}
+
+
+--- File: src\main\java\ticketmgmt\repository\CustomerRepository.java ---
+package ticketmgmt.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import ticketmgmt.model.Customer;
+
+import java.util.Optional;
+
+public interface CustomerRepository extends JpaRepository<Customer, Integer> {
+    Optional<Customer> findByName(String name);
+}
+
+
+--- File: src\main\java\ticketmgmt\repository\EngineerRepository.java ---
+package ticketmgmt.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import ticketmgmt.model.Engineer;
+
+public interface EngineerRepository extends JpaRepository<Engineer, Integer> {
+}
+
+
+--- File: src\main\java\ticketmgmt\repository\IssueAttachmentRpository.java ---
+package ticketmgmt.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import ticketmgmt.model.IssueAttachment;
+
+public interface IssueAttachmentRpository extends JpaRepository<IssueAttachment,Integer> {
+}
+
+
+--- File: src\main\java\ticketmgmt\repository\TicketRepository.java ---
+package ticketmgmt.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import ticketmgmt.model.Ticket;
+
+public interface TicketRepository extends JpaRepository<Ticket, Integer> {
+}
+
+
+--- File: src\main\java\ticketmgmt\repository\controller\FileUploadController.java ---
+// FileUploadController.java - placeholder
+
+
+--- File: src\main\java\ticketmgmt\repository\controller\TicketController.java ---
+// TicketController.java - placeholder
+
+
+--- File: src\main\java\ticketmgmt\service\AuditLogService.java ---
+package ticketmgmt.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import ticketmgmt.model.AuditLog;
+import ticketmgmt.model.Ticket;
+import ticketmgmt.repository.AuditLogRepository;
+
+import java.time.LocalDateTime;
+
+@Service
+@RequiredArgsConstructor
+public class AuditLogService {
+
+    private final AuditLogRepository auditLogRepository;
+
+    public void log(Ticket ticket, String message) {
+        AuditLog log = AuditLog.builder()
+                .ticket(ticket)
+                .message(message)
+                .timestamp(LocalDateTime.now())
+                .build();
+        auditLogRepository.save(log);
+    }
+}
+
+
+--- File: src\main\java\ticketmgmt\service\FileStorageService.java ---
+package ticketmgmt.service;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+@Service
+public class FileStorageService {
+
+    private static final String UPLOAD_DIR = "uploads";
+
+    public String saveFile(MultipartFile file) throws IOException {
+        Path uploadPath = Paths.get(UPLOAD_DIR);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        Path filePath = uploadPath.resolve(filename);
+        file.transferTo(filePath);
+        return filePath.toString();
+    }
+}
+
+
+--- File: src\main\java\ticketmgmt\service\TicketService.java ---
+package ticketmgmt.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import ticketmgmt.model.*;
+import ticketmgmt.repository.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+public class TicketService {
+
+    private final TicketRepository ticketRepository;
+    private final CustomerRepository customerRepository;
+    private final EngineerRepository engineerRepository;
+    private final AuditLogService auditLogService;
+
+    // Create new ticket and associate with a customer
+    public Ticket createTicket(String customerName, String issue, TicketPriority priority) {
+        Customer customer = customerRepository.findByName(customerName)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        Ticket ticket = Ticket.builder()
+                .customerName(customerName)
+                .issueDescription(issue)
+                .ticketStatus(TicketStatus.OPEN)
+                .priority(priority)
+                .ticketResponse("Ticket created")
+                .customer(customer)
+                .build();
+
+        Ticket savedTicket = ticketRepository.save(ticket);
+        auditLogService.log(savedTicket, "Ticket created");
+        return savedTicket;
+    }
+
+    // Get a ticket by ID
+    public Optional<Ticket> getTicketById(Integer ticketId) {
+        return ticketRepository.findById(ticketId);
+    }
+
+    // Engineer chooses (claims) a ticket
+    public Ticket assignTicketToEngineer(Integer ticketId, Integer engineerId) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+        Engineer engineer = engineerRepository.findById(engineerId)
+                .orElseThrow(() -> new RuntimeException("Engineer not found"));
+
+        ticket.setAssignedEngineer(engineer);
+        auditLogService.log(ticket, "Assigned to engineer: " + engineer.getName());
+        return ticketRepository.save(ticket);
+    }
+
+    // Engineer removes themselves from ticket
+    public Ticket unassignEngineer(Integer ticketId) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        ticket.setAssignedEngineer(null);
+        auditLogService.log(ticket, "Unassigned engineer");
+        return ticketRepository.save(ticket);
+    }
+
+    // Get all tickets
+    public List<Ticket> getAllTickets() {
+        return ticketRepository.findAll();
+    }
+}
+
+
+--- File: src\main\resources\application.properties ---
+# Database Configuration
+spring.datasource.url=jdbc:mysql://localhost:3306/ticketmgmt
+spring.datasource.username=root
+spring.datasource.password=root@1234
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# JPA Config
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+
+# Server
+server.port=8080
+
+# File Upload (optional)
+file.upload-dir=uploads
+
+# Logging
+logging.level.org.hibernate.SQL=DEBUG
+
+
+--- File: src\test\java\ticketmgmt\ticketmgmt\TicketMgmtApplicationTests.java ---
+package ticketmgmt.ticketmgmt;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class TicketMgmtApplicationTests {
+
+    @Test
+    void contextLoads() {
+    }
+
+}
+
+
+--- File: target\classes\application.properties ---
+# Database Configuration
+spring.datasource.url=jdbc:mysql://localhost:3306/ticketmgmt
+spring.datasource.username=root
+spring.datasource.password=root@1234
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# JPA Config
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+
+# Server
+server.port=8080
+
+# File Upload (optional)
+file.upload-dir=uploads
+
+# Logging
+logging.level.org.hibernate.SQL=DEBUG

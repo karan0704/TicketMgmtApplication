@@ -1,0 +1,5 @@
+python -m http.server 8000
+
+show databases;
+	use ticketmgmt;
+		show tables;

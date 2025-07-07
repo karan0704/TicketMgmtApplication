@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ticket Management</title>
+</head>
+<body>
+
+  <h2>Create Ticket</h2>
+  <form id="createForm">
+    Customer Name: <input type="text" id="customerName" required><br>
+    Issue: <input type="text" id="issue" required><br>
+    Priority:
+    <select id="priority">
+      <option value="LOW">LOW</option>
+      <option value="MEDIUM">MEDIUM</option>
+      <option value="HIGH">HIGH</option>
+      <option value="CRITICAL">CRITICAL</option>
+    </select><br>
+    <button type="submit">Create</button>
+  </form>
+  <div id="createResult"></div>
+
+  <h2>Get Ticket by ID</h2>
+  ID: <input type="number" id="getId">
+  <button onclick="getTicketById()">Fetch</button>
+  <pre id="getResult"></pre>
+
+  <h2>Delete Ticket</h2>
+  ID: <input type="number" id="deleteId">
+  <button onclick="deleteTicket()">Delete</button>
+  <div id="deleteResult"></div>
+
+  <h2>All Tickets</h2>
+  <button onclick="fetchAll()">Load All</button>
+  <pre id="allResult"></pre>
+
+  <script>
+    const BASE = "http://localhost:8080/api/tickets";
+
+    document.getElementById("createForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const name = document.getElementById("customerName").value;
+      const issue = document.getElementById("issue").value;
+      const priority = document.getElementById("priority").value;
+
+      const formData = new URLSearchParams();
+      formData.append("customerName", name);
+      formData.append("issue", issue);
+      formData.append("priority", priority);
+
+      try {
+        const res = await fetch(`${BASE}/create`, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: formData
+        });
+        const data = await res.json();
+	console.log("Create Response:", data); 
+        document.getElementById("createResult").innerText = "Created Ticket ID: " + data.id;
+      } catch (err) {
+        document.getElementById("createResult").innerText = "Error creating ticket";
+      }
+    });
+
+    async function getTicketById() {
+      const id = document.getElementById("getId").value;
+      try {
+        const res = await fetch(`${BASE}/${id}`);
+        const data = await res.json();
+        document.getElementById("getResult").innerText = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("getResult").innerText = "Ticket not found";
+      }
+    }
+
+    async function deleteTicket() {
+      const id = document.getElementById("deleteId").value;
+      try {
+        const res = await fetch(`${BASE}/${id}`, { method: "DELETE" });
+        if (res.ok) {
+          document.getElementById("deleteResult").innerText = "Deleted Ticket ID: " + id;
+        } else {
+          document.getElementById("deleteResult").innerText = "Ticket not found";
+        }
+      } catch (err) {
+        document.getElementById("deleteResult").innerText = "Error deleting ticket";
+      }
+    }
+
+    async function fetchAll() {
+      try {
+        const res = await fetch(`${BASE}/all`);
+        const data = await res.json();
+        document.getElementById("allResult").innerText = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("allResult").innerText = "Error loading tickets";
+      }
+    }
+  </script>
+</body>
+</html>

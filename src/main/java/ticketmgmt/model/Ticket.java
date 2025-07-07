@@ -1,26 +1,45 @@
 package ticketmgmt.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+import java.util.List;
 
-@Data
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+
 public class Ticket {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int ticketId;
-    private String issueDescription;
+    private Integer id;
+
     private String customerName;
-
-
-
-
-    private String response;
+    private String issueDescription;
 
     @Enumerated(EnumType.STRING)
-    TicketStatus ticketStatus;
+    private TicketStatus ticketStatus;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    Ticket ticket;
+    @Enumerated(EnumType.STRING)
+    private TicketPriority priority;
+
+    private String ticketResponse;
+
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LogFile> logFiles;
+
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AuditLog> auditLogs;
+
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
+
+    @ManyToOne
+    @JoinColumn(name = "engineer_id")
+    private Engineer assignedEngineer;
 }

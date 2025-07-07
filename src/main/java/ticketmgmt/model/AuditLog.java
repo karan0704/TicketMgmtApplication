@@ -1,23 +1,26 @@
 package ticketmgmt.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-        import lombok.*;
+import lombok.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class IssueAttachment {
+public class AuditLog {
 
-   @Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String fileName;
-    private String filePath;
+    private String message;
+    private LocalDateTime timestamp;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "ticket_id")
     private Ticket ticket;
 }
