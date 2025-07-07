@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 public class AuditLog {
 
-    @Id
+   @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 

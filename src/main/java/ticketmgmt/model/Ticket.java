@@ -28,11 +28,13 @@ public class Ticket {
 
     private String ticketResponse;
 
-    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+   @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LogFile> logFiles;
 
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AuditLog> auditLogs;
+
+
 
     @ManyToOne
     @JsonIgnore
@@ -41,5 +43,6 @@ public class Ticket {
 
     @ManyToOne
     @JoinColumn(name = "engineer_id")
+    @JsonIgnore
     private Engineer assignedEngineer;
 }
