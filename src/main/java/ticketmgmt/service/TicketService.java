@@ -25,7 +25,6 @@ public class TicketService {
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
         Ticket ticket = Ticket.builder()
-                //.customerName(customerName)
                 .issueDescription(issue)
                 .ticketStatus(TicketStatus.OPEN)
                 .priority(priority)
@@ -62,6 +61,17 @@ public class TicketService {
 
         ticket.setAssignedEngineer(null);
         auditLogService.log(ticket, "Unassigned engineer");
+        return ticketRepository.save(ticket);
+    }
+
+    // New method to update ticket status
+    public Ticket updateTicketStatus(Integer ticketId, TicketStatus newStatus) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        TicketStatus oldStatus = ticket.getTicketStatus();
+        ticket.setTicketStatus(newStatus);
+        auditLogService.log(ticket, "Ticket status changed from " + oldStatus + " to " + newStatus);
         return ticketRepository.save(ticket);
     }
 
