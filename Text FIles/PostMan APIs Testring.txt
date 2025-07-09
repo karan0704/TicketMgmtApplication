@@ -1,0 +1,33 @@
+
+http://localhost:8080/api/auth/register
+{
+  "username": "karan123",
+  "email": "karan@example.com",
+  "password": "Pass123",
+  "role": "ROLE_CUSTOMER"
+}
+{
+    "id": 2,
+    "username": "karan123",
+    "email": "karan@example.com",
+    "password": "$2a$10$dcaKaYoKCn3Udm01/InTtuZiSQa/0ycoTFg600YH4Cp9aieulT9pW",
+    "role": "ROLE_CUSTOMER"
+}
+
+--------------------------------------------------------------	
+http://localhost:8080/api/auth/login	
+{
+  "username": "karan123",
+  "email": "karan@example.com",
+  "password": "Pass123",
+  "role": "ROLE_CUSTOMER"
+}
+Login successful
+-------------------------------------------------------------
+POST http://localhost:8080/api/customers
+{
+  "name": "Karan",
+  "email": "karan@example.com",
+  "phoneNumber": "9876543210",
+  "companyName": "Karan Pvt Ltd"
+}
