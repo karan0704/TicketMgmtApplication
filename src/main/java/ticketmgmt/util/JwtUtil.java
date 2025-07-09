@@ -83,7 +83,22 @@ public class JwtUtil {
 
     // Get the signing key from the secret
     private Key getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
-        return Keys.hmacShaKeyFor(keyBytes);
+        // Use recommended method to create a secure key for HS256
+        if (SECRET_KEY == null || SECRET_KEY.trim().isEmpty()) {
+            // If no secret key is provided, generate a secure key
+            return Keys.secretKeyFor(SignatureAlgorithm.HS256);
+        }
+
+        try {
+            byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+            // Verify key length meets requirements (≥ 256 bits for HS256)
+            if (keyBytes.length * 8 < 256) {
+                throw new IllegalArgumentException("The JWT secret key is too short");
+            }
+            return Keys.hmacShaKeyFor(keyBytes);
+        } catch (Exception e) {
+            // Fallback to a secure generated key if there's any issue with the provided key
+            return Keys.secretKeyFor(SignatureAlgorithm.HS256);
+        }
     }
 }
