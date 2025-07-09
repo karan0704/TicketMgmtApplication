@@ -38,10 +38,6 @@ public class Ticket {
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AuditLog> auditLogs;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    @JsonIgnore
-    private AppUser user;
 
     @ManyToOne
     @JsonIgnore

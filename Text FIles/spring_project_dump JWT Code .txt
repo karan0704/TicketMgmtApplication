@@ -36,12 +36,11 @@ public class TicketMgmtApplication {
     }
 
 }
-    
+
 
 --- File: src\main\java\ticketmgmt\config\CorsConfig.java ---
 package ticketmgmt.config;
 
-import org.antlr.v4.runtime.misc.NotNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -54,15 +53,219 @@ public class CorsConfig {
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
-            public void addCorsMappings(@NotNull CorsRegistry registry) {
+            public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("*")
+                        .allowedOrigins(
+                                "http://localhost:4200",
+                                "http://localhost:8000",
+                                "http://127.0.0.1:5500",
+                                "file://",
+                                "null"
+                        )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*");
+                        .allowedHeaders("*")
+                        .exposedHeaders("Authorization")
+                        .allowCredentials(true)
+                        .maxAge(3600);
             }
         };
     }
 }
+
+--- File: src\main\java\ticketmgmt\config\PasswordConfig.java ---
+package ticketmgmt.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+@Configuration
+public class PasswordConfig {
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+}
+
+
+--- File: src\main\java\ticketmgmt\config\SecurityConfig.java ---
+package ticketmgmt.config;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import ticketmgmt.filter.JwtRequestFilter; // Import the new filter
+
+import java.util.Arrays;
+
+@Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
+public class SecurityConfig {
+
+    private final JwtRequestFilter jwtRequestFilter; // Inject the JWT filter
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Make session stateless
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/api/auth/**", // Allow authentication endpoints
+                                "/error",
+                                "/api/public/**"
+                        ).permitAll() // Public access
+                        .anyRequest().authenticated() // All other requests require authentication
+                )
+                // Add the JWT filter before the UsernamePasswordAuthenticationFilter
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:4200",
+                "http://localhost:8000",
+                "http://127.0.0.1:5500", // For your local HTML server
+                "file://", // For direct file access (less secure, but useful for local dev)
+                "null" // For certain local file protocols
+        ));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        configuration.setExposedHeaders(Arrays.asList("Authorization")); // Expose Authorization header
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    // Expose AuthenticationManager as a Bean
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+}
+
+
+--- File: src\main\java\ticketmgmt\controller\AuthController.java ---
+package ticketmgmt.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+import ticketmgmt.model.AppUser;
+import ticketmgmt.repository.AppUserRepository;
+import ticketmgmt.util.JwtUtil; // Import JwtUtil
+import ticketmgmt.service.AppUserDetailsService; // Import AppUserDetailsService
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
+public class AuthController {
+
+    private final AuthenticationManager authenticationManager; // Renamed for clarity
+    private final AppUserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil; // Inject JwtUtil
+    private final AppUserDetailsService userDetailsService; // Inject AppUserDetailsService
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody AppUser user) {
+        try {
+            if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "Username already exists");
+                return ResponseEntity.badRequest().body(error);
+            }
+
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            AppUser savedUser = userRepository.save(user);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "User registered successfully");
+            response.put("username", savedUser.getUsername());
+            response.put("role", savedUser.getRole().name());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Registration failed: " + e.getMessage()); // Provide more detail
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody AppUser user) {
+        try {
+            // Authenticate the user using Spring Security's AuthenticationManager
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+
+            // Set the authentication in the SecurityContext (optional for stateless, but good practice)
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // Load user details to generate token with correct authorities/roles
+            final org.springframework.security.core.userdetails.UserDetails userDetails =
+                    userDetailsService.loadUserByUsername(user.getUsername());
+
+            // Generate JWT token
+            final String jwt = jwtUtil.generateToken(userDetails);
+
+            AppUser loggedInUser = userRepository.findByUsername(user.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found after successful authentication."));
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Login successful");
+            response.put("username", loggedInUser.getUsername());
+            response.put("role", loggedInUser.getRole().name());
+            response.put("userId", loggedInUser.getId());
+            response.put("token", jwt); // Return the JWT token
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Invalid credentials: " + e.getMessage()); // Provide more detail
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        // For JWT, logout is primarily client-side (removing the token).
+        // Clearing the server-side SecurityContext is good practice but not strictly necessary for stateless.
+        SecurityContextHolder.getContext().setAuthentication(null);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Logged out successfully (client-side token removal expected)");
+        return ResponseEntity.ok(response);
+    }
+}
+
 
 --- File: src\main\java\ticketmgmt\controller\CustomerController.java ---
 package ticketmgmt.controller;
@@ -231,6 +434,106 @@ public class TicketRequest {
     private String customerName;
     private String issue;
     private TicketPriority priority;
+}
+
+
+--- File: src\main\java\ticketmgmt\filter\JwtRequestFilter.java ---
+package ticketmgmt.filter;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+import ticketmgmt.service.AppUserDetailsService;
+import ticketmgmt.util.JwtUtil;
+
+import java.io.IOException;
+
+@Component
+@RequiredArgsConstructor
+public class JwtRequestFilter extends OncePerRequestFilter {
+
+    private final AppUserDetailsService userDetailsService;
+    private final JwtUtil jwtUtil;
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
+
+        final String authorizationHeader = request.getHeader("Authorization");
+
+        String username = null;
+        String jwt = null;
+
+        // Check for Authorization header and Bearer token
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            jwt = authorizationHeader.substring(7); // Extract JWT token
+            username = jwtUtil.extractUsername(jwt); // Extract username from token
+        }
+
+        // If a username is found and no authentication is set in SecurityContext
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+
+            // Validate the token
+            if (jwtUtil.validateToken(jwt, userDetails)) {
+                // Create an authentication token and set it in SecurityContext
+                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+                usernamePasswordAuthenticationToken
+                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+            }
+        }
+        chain.doFilter(request, response); // Continue the filter chain
+    }
+}
+
+
+--- File: src\main\java\ticketmgmt\model\AppUser.java ---
+package ticketmgmt.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class AppUser {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Column(unique = true)
+    private String username;
+
+    private String email;
+
+    private String password;
+    @Enumerated(EnumType.STRING)
+    private Role role;
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
+    private List<Ticket> tickets;
+
+    public enum Role {
+        ROLE_CUSTOMER, ROLE_ENGINEER
+    }
 }
 
 
@@ -434,6 +737,10 @@ public class Ticket {
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AuditLog> auditLogs;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
+    private AppUser user;
 
     @ManyToOne
     @JsonIgnore
@@ -460,6 +767,21 @@ package ticketmgmt.model;
 
 public enum TicketStatus {
     OPEN, ACKNOWLEDGED, CLOSED
+}
+
+
+--- File: src\main\java\ticketmgmt\repository\AppUserRepository.java ---
+package ticketmgmt.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import ticketmgmt.model.AppUser;
+
+import java.util.Optional;
+
+@Repository
+public interface AppUserRepository extends JpaRepository<AppUser, Integer> {
+    Optional<AppUser> findByUsername(String username);
 }
 
 
@@ -527,6 +849,57 @@ import ticketmgmt.model.Ticket;
 
 public interface TicketRepository extends JpaRepository<Ticket, Integer> {
 }
+
+
+--- File: src\main\java\ticketmgmt\service\AppUserDetailsService.java ---
+package ticketmgmt.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+import ticketmgmt.model.AppUser;
+import ticketmgmt.repository.AppUserRepository;
+
+@Service
+@RequiredArgsConstructor
+@ComponentScan("ticketmgmt.repository")
+public class AppUserDetailsService implements UserDetailsService {
+
+    private final AppUserRepository repository;
+
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        AppUser user = repository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+        System.out.println("User loaded: " + user.getUsername() + ", Role: " + user.getRole());
+
+        String role = user.getRole().name();
+        if (role.startsWith("ROLE_")) {
+            role = role.substring(5);
+        }
+
+        return org.springframework.security.core.userdetails.User
+                .withUsername(user.getUsername())
+                .password(user.getPassword())
+                .roles(role)
+                //.roles(user.getRole().name())
+                .build();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+}
+
 
 
 --- File: src\main\java\ticketmgmt\service\AuditLogService.java ---
@@ -715,6 +1088,98 @@ public class TicketService {
 }
 
 
+--- File: src\main\java\ticketmgmt\util\JwtUtil.java ---
+package ticketmgmt.util;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+
+import java.security.Key;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
+@Component
+public class JwtUtil {
+
+    // Secret key for JWT signing. This should be a strong, randomly generated key.
+    // In a production environment, store this securely (e.g., environment variable).
+    @Value("${jwt.secret}")
+    private String SECRET_KEY;
+
+    // Expiration time for the token (e.g., 10 hours)
+    @Value("${jwt.expiration}")
+    private long JWT_TOKEN_VALIDITY; // in milliseconds
+
+    // Retrieve username from JWT token
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+
+    // Retrieve expiration date from a JWT token
+    public Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
+
+    // Generic method to extract a specific claim from the token
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
+    // Retrieve all claims from the token
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
+    }
+
+    // Check if the token has expired
+    private Boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    // Generate token for user
+    public String generateToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        // Add roles to claims
+        claims.put("roles", userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(java.util.stream.Collectors.toList()));
+        return createToken(claims, userDetails.getUsername());
+    }
+
+    // Create the token
+    private String createToken(Map<String, Object> claims, String subject) {
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(subject)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    // Validate token
+    public Boolean validateToken(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    // Get the signing key from the secret
+    private Key getSigningKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+}
+
+
 --- File: src\main\resources\application.properties ---
 # Database Configuration
 spring.datasource.url=jdbc:mysql://localhost:3306/ticketmgmt
@@ -735,15 +1200,18 @@ server.port=8080
 file.upload-dir=uploads
 
 # Logging
-debug=false
+debug=true
 logging.level.org.hibernate.SQL=DEBUG
-logging.level.org.springframework.context=INFO
+logging.level.org.springframework.security=DEBUG
+logging.level.org.springframework.context=DEBUG
 
-spring.main.allow-bean-definition-overriding=true
 
 spring.servlet.multipart.max-file-size=10MB
 spring.servlet.multipart.max-request-size=10MB
 
+# JWT Configuration (ADD THESE LINES)
+jwt.secret=_b8h9FuLR9L1DjoUYDejIrnALiAI9oRTIqcrLg2yYkY=
+jwt.expiration=36000000 # 10 hours in milliseconds (10 * 60 * 60 * 1000)
 
 --- File: src\test\java\ticketmgmt\TicketMgmtApplicationTests.java ---
 package ticketmgmt;
@@ -781,11 +1249,15 @@ server.port=8080
 file.upload-dir=uploads
 
 # Logging
-debug=false
+debug=true
 logging.level.org.hibernate.SQL=DEBUG
-logging.level.org.springframework.context=INFO
+logging.level.org.springframework.security=DEBUG
+logging.level.org.springframework.context=DEBUG
 
-spring.main.allow-bean-definition-overriding=true
 
 spring.servlet.multipart.max-file-size=10MB
 spring.servlet.multipart.max-request-size=10MB
+
+# JWT Configuration (ADD THESE LINES)
+jwt.secret=_b8h9FuLR9L1DjoUYDejIrnALiAI9oRTIqcrLg2yYkY=
+jwt.expiration=36000000 # 10 hours in milliseconds (10 * 60 * 60 * 1000)
