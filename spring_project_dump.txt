@@ -1,0 +1,1040 @@
+
+
+--- File: .mvn\wrapper\maven-wrapper.properties ---
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+wrapperVersion=3.3.2
+distributionType=only-script
+distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.10/apache-maven-3.9.10-bin.zip
+
+
+--- File: src\main\java\ticketmgmt\TicketMgmtApplication.java ---
+package ticketmgmt;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication(scanBasePackages = "ticketmgmt")
+public class TicketMgmtApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(TicketMgmtApplication.class, args);
+    }
+
+}
+    
+
+--- File: src\main\java\ticketmgmt\config\CorsConfig.java ---
+package ticketmgmt.config;
+
+import org.antlr.v4.runtime.misc.NotNull;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class CorsConfig {
+
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(@NotNull CorsRegistry registry) {
+                registry.addMapping("/**")
+                        .allowedOrigins("*")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*");
+            }
+        };
+    }
+}
+
+--- File: src\main\java\ticketmgmt\controller\CustomerController.java ---
+package ticketmgmt.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import ticketmgmt.model.Customer;
+import ticketmgmt.repository.CustomerRepository;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/customers")
+@RequiredArgsConstructor
+public class CustomerController {
+    private final CustomerRepository customerRepository;
+
+    @PostMapping
+    public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
+        return ResponseEntity.ok(customerRepository.save(customer));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Customer>>
+    getAllCustomers() {
+        return ResponseEntity.ok(customerRepository.findAll());
+    }
+
+    @GetMapping("/{id}")
+    ResponseEntity<Customer> getCustomer(@PathVariable Integer id) {
+        return customerRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+
+    }
+}
+
+
+--- File: src\main\java\ticketmgmt\controller\EngineerController.java ---
+package ticketmgmt.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import ticketmgmt.model.Engineer;
+import ticketmgmt.repository.EngineerRepository;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/engineers")
+@RequiredArgsConstructor
+public class EngineerController {
+
+    private final EngineerRepository engineerRepository; // Inject EngineerRepository
+
+    @GetMapping
+    public ResponseEntity<List<Engineer>> getAllEngineers() {
+        // This endpoint will return all engineers from the database
+        return ResponseEntity.ok(engineerRepository.findAll());
+    }
+
+    // Optional: Add an endpoint to create engineers for testing
+    @PostMapping
+    public ResponseEntity<Engineer> createEngineer(@RequestBody Engineer engineer) {
+        return ResponseEntity.ok(engineerRepository.save(engineer));
+    }
+}
+    
+
+--- File: src\main\java\ticketmgmt\controller\FileUploadController.java ---
+package ticketmgmt.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import ticketmgmt.service.FileStorageService;
+
+@RestController
+@RequestMapping("/api/files")
+@RequiredArgsConstructor
+public class FileUploadController {
+
+    private final FileStorageService fileStorageService;
+
+    @PostMapping("/upload/{ticketId}")
+    public ResponseEntity<String> upload(@RequestParam MultipartFile file, @PathVariable Integer ticketId) {
+        try {
+            String path = fileStorageService.saveFile(file);
+            fileStorageService.attachToTicket(ticketId, path); // ticket -> logFile
+            return ResponseEntity.ok("File saved and attached to ticket ID: " + ticketId);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to upload file");
+        }
+    }
+
+    @GetMapping("/ticket/{ticketId}")
+    public ResponseEntity<?> getFiles(@PathVariable Integer ticketId) {
+        return ResponseEntity.ok(fileStorageService.getFilesByTicket(ticketId));
+    }
+}
+
+
+--- File: src\main\java\ticketmgmt\controller\TicketController.java ---
+/*package ticketmgmt.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import ticketmgmt.dto.TicketRequest;
+import ticketmgmt.model.Ticket;
+import ticketmgmt.model.TicketPriority;
+import ticketmgmt.service.TicketService;
+
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/api/tickets")
+@RequiredArgsConstructor
+public class TicketController {
+
+    private final TicketService ticketService;
+
+    @PostMapping("/create")
+    public ResponseEntity<Ticket> createTicket(//@RequestParam String customerName, @RequestParam String issue,@RequestParam TicketPriority priority
+                                               @RequestBody TicketRequest request) {
+        Ticket created = ticketService.createTicket(request.getCustomerName(), request.getIssue(), request.getPriority());
+        return ResponseEntity.ok(created);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Ticket> getTicket(@PathVariable Integer id) {
+        Optional<Ticket> ticket = ticketService.getTicketById(id);
+        return ticket.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{id}/assign/{engineerId}")
+    public ResponseEntity<Ticket> assign(@PathVariable Integer id, @PathVariable Integer engineerId) {
+        return ResponseEntity.ok(ticketService.assignTicketToEngineer(id, engineerId));
+    }
+
+    @PostMapping("/{id}/unassign")
+    public ResponseEntity<Ticket> unassign(@PathVariable Integer id) {
+        return ResponseEntity.ok(ticketService.unassignEngineer(id));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<Ticket>> getAllTickets() {
+        return ResponseEntity.ok(ticketService.getAllTickets());
+    }
+}*/
+package ticketmgmt.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import ticketmgmt.dto.TicketRequest;
+import ticketmgmt.dto.TicketResponse;
+import ticketmgmt.mapper.TicketMapper;
+import ticketmgmt.service.TicketService;
+
+import jakarta.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/tickets")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
+public class TicketController {
+
+    private final TicketService ticketService;
+    private final TicketMapper ticketMapper;
+
+    @PostMapping("/create")
+    public ResponseEntity<TicketResponse> createTicket(@Valid @RequestBody TicketRequest request) {
+        var ticket = ticketService.createTicket(request.getCustomerName(), request.getIssue(), request.getPriority());
+        return ResponseEntity.ok(ticketMapper.toResponse(ticket));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<TicketResponse> getTicket(@PathVariable Integer id) {
+        return ticketService.getTicketById(id)
+                .map(ticket -> ResponseEntity.ok(ticketMapper.toResponse(ticket)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{id}/assign/{engineerId}")
+    public ResponseEntity<TicketResponse> assign(@PathVariable Integer id, @PathVariable Integer engineerId) {
+        var ticket = ticketService.assignTicketToEngineer(id, engineerId);
+        return ResponseEntity.ok(ticketMapper.toResponse(ticket));
+    }
+
+    @PostMapping("/{id}/unassign")
+    public ResponseEntity<TicketResponse> unassign(@PathVariable Integer id) {
+        var ticket = ticketService.unassignEngineer(id);
+        return ResponseEntity.ok(ticketMapper.toResponse(ticket));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<TicketResponse>> getAllTickets() {
+        var tickets = ticketService.getAllTickets().stream()
+                .map(ticketMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(tickets);
+    }
+}
+
+
+--- File: src\main\java\ticketmgmt\dto\CustomerRequest.java ---
+
+package ticketmgmt.dto;
+
+import jakarta.validation.constraints.Email;
+import lombok.Data;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+
+@Data
+public class CustomerRequest {
+    @NotBlank(message = "Name is required")
+    private String name;
+
+    @Email(message = "Invalid email format")
+    @NotBlank(message = "Email is required")
+    private String email;
+
+    @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Invalid phone number")
+    private String phoneNumber;
+
+    @NotBlank(message = "Company name is required")
+    private String companyName;
+}
+
+--- File: src\main\java\ticketmgmt\dto\CustomerResponse.java ---
+package ticketmgmt.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class CustomerResponse {
+    private Integer id;
+    private String name;
+    private String email;
+    private String phoneNumber;
+    private String companyName;
+}
+
+
+
+--- File: src\main\java\ticketmgmt\dto\EngineerRequest.java ---
+package ticketmgmt.dto;
+
+import lombok.Data;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
+@Data
+public class EngineerRequest {
+    @NotBlank(message = "Name is required")
+    private String name;
+
+    @Email(message = "Invalid email format")
+    @NotBlank(message = "Email is required")
+    private String email;
+
+    @NotBlank(message = "Designation is required")
+    private String designation;
+}
+
+
+--- File: src\main\java\ticketmgmt\dto\EngineerResponse.java ---
+package ticketmgmt.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+
+public class EngineerResponse {
+    private Integer id;
+    private String name;
+    private String email;
+    private String designation;
+}
+
+
+--- File: src\main\java\ticketmgmt\dto\TicketRequest.java ---
+package ticketmgmt.dto;
+
+import lombok.Data;
+import ticketmgmt.model.TicketPriority;
+
+@Data
+
+public class TicketRequest {
+    private String customerName;
+    private String issue;
+    private TicketPriority priority;
+}
+
+
+--- File: src\main\java\ticketmgmt\dto\TicketResponse.java ---
+package ticketmgmt.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import ticketmgmt.model.TicketPriority;
+import ticketmgmt.model.TicketStatus;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class TicketResponse {
+    private Integer id;
+    private String issueDescription;
+    private TicketStatus ticketStatus;
+    private TicketPriority priority;
+    private String ticketResponse;
+    private CustomerResponse customer;
+    private EngineerResponse assignedEngineer;
+}
+
+
+--- File: src\main\java\ticketmgmt\exception\GlobalExceptionHandler.java ---
+package ticketmgmt.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationExceptions(
+            MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage())
+        );
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+}
+
+--- File: src\main\java\ticketmgmt\mapper\TicketMapper.java ---
+package ticketmgmt.mapper;
+
+import org.springframework.stereotype.Component;
+import ticketmgmt.dto.TicketResponse;
+import ticketmgmt.dto.CustomerResponse;
+import ticketmgmt.dto.EngineerResponse;
+import ticketmgmt.model.Ticket;
+import ticketmgmt.model.Customer;
+import ticketmgmt.model.Engineer;
+
+@Component
+public class TicketMapper {
+
+    public TicketResponse toResponse(Ticket ticket) {
+        return TicketResponse.builder()
+                .id(ticket.getId())
+                .issueDescription(ticket.getIssueDescription())
+                .ticketStatus(ticket.getTicketStatus())
+                .priority(ticket.getPriority())
+                .ticketResponse(ticket.getTicketResponse())
+                .customer(ticket.getCustomer() != null ? toCustomerResponse(ticket.getCustomer()) : null)
+                .assignedEngineer(ticket.getAssignedEngineer() != null ? toEngineerResponse(ticket.getAssignedEngineer()) : null)
+                .build();
+    }
+
+    private CustomerResponse toCustomerResponse(Customer customer) {
+        return CustomerResponse.builder()
+                .id(customer.getId())
+                .name(customer.getName())
+                .email(customer.getEmail())
+                .phoneNumber(customer.getPhoneNumber())
+                .companyName(customer.getCompanyName())
+                .build();
+    }
+
+    private EngineerResponse toEngineerResponse(Engineer engineer) {
+        return EngineerResponse.builder()
+                .id(engineer.getId())
+                .name(engineer.getName())
+                .email(engineer.getEmail())
+                .designation(engineer.getDesignation())
+                .build();
+    }
+}
+
+--- File: src\main\java\ticketmgmt\model\AuditLog.java ---
+package ticketmgmt.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class AuditLog {
+
+   @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private String message;
+    private LocalDateTime timestamp;
+
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "ticket_id")
+    private Ticket ticket;
+}
+
+
+--- File: src\main\java\ticketmgmt\model\Customer.java ---
+package ticketmgmt.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Customer {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private String name;
+    private String email;
+    private String phoneNumber;
+    private String companyName;
+
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Ticket> tickets;
+}
+
+
+--- File: src\main\java\ticketmgmt\model\Engineer.java ---
+package ticketmgmt.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Engineer {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private String name;
+    private String email;
+    private String designation;
+
+    @OneToMany(mappedBy = "assignedEngineer", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Ticket> assignedTickets;
+}
+
+
+--- File: src\main\java\ticketmgmt\model\IssueAttachment.java ---
+package ticketmgmt.model;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class IssueAttachment {
+
+   @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private String fileName;
+    private String filePath;
+
+    @ManyToOne
+    @JoinColumn(name = "ticket_id")
+    private Ticket ticket;
+}
+
+
+--- File: src\main\java\ticketmgmt\model\LogFile.java ---
+package ticketmgmt.model;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+
+public class LogFile {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private String filename;
+    private String filePath;
+
+    @ManyToOne
+    @JoinColumn(name = "ticket_id")
+    private Ticket ticket;
+}
+
+
+--- File: src\main\java\ticketmgmt\model\Ticket.java ---
+package ticketmgmt.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+
+public class Ticket {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    // private String customerName;
+    private String issueDescription;
+
+    @Enumerated(EnumType.STRING)
+    private TicketStatus ticketStatus;
+
+    @Enumerated(EnumType.STRING)
+    private TicketPriority priority;
+
+    private String ticketResponse;
+
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LogFile> logFiles;
+
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AuditLog> auditLogs;
+
+
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
+
+    @ManyToOne
+    @JoinColumn(name = "engineer_id")
+    @JsonIgnore
+    private Engineer assignedEngineer;
+}
+
+
+--- File: src\main\java\ticketmgmt\model\TicketPriority.java ---
+package ticketmgmt.model;
+
+public enum TicketPriority {
+        LOW, MEDIUM, HIGH, CRITICAL
+}
+
+
+--- File: src\main\java\ticketmgmt\model\TicketStatus.java ---
+package ticketmgmt.model;
+
+public enum TicketStatus {
+    OPEN, ACKNOWLEDGED, CLOSED
+}
+
+
+--- File: src\main\java\ticketmgmt\repository\AuditLogRepository.java ---
+package ticketmgmt.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import ticketmgmt.model.AuditLog;
+
+public interface AuditLogRepository extends JpaRepository<AuditLog, Integer> {
+}
+
+
+--- File: src\main\java\ticketmgmt\repository\CustomerRepository.java ---
+package ticketmgmt.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import ticketmgmt.model.Customer;
+
+import java.util.Optional;
+
+public interface CustomerRepository extends JpaRepository<Customer, Integer> {
+    Optional<Customer> findByName(String name);
+}
+
+
+--- File: src\main\java\ticketmgmt\repository\EngineerRepository.java ---
+package ticketmgmt.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import ticketmgmt.model.Engineer;
+
+public interface EngineerRepository extends JpaRepository<Engineer, Integer> {
+}
+
+
+--- File: src\main\java\ticketmgmt\repository\IssueAttachmentRepository.java ---
+package ticketmgmt.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import ticketmgmt.model.IssueAttachment;
+
+public interface IssueAttachmentRepository extends JpaRepository<IssueAttachment,Integer> {
+}
+
+
+--- File: src\main\java\ticketmgmt\repository\LogFileRepository.java ---
+package ticketmgmt.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import ticketmgmt.model.LogFile;
+
+import java.util.List;
+
+public interface LogFileRepository extends JpaRepository<LogFile, Integer> {
+    List<LogFile> findByTicketId(Integer ticketId);
+}
+
+
+--- File: src\main\java\ticketmgmt\repository\TicketRepository.java ---
+package ticketmgmt.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import ticketmgmt.model.Ticket;
+
+public interface TicketRepository extends JpaRepository<Ticket, Integer> {
+}
+
+
+--- File: src\main\java\ticketmgmt\service\AuditLogService.java ---
+package ticketmgmt.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import ticketmgmt.model.AuditLog;
+import ticketmgmt.model.Ticket;
+import ticketmgmt.repository.AuditLogRepository;
+
+import java.time.LocalDateTime;
+
+@Service
+@RequiredArgsConstructor
+public class AuditLogService {
+
+    private final AuditLogRepository auditLogRepository;
+
+    public void log(Ticket ticket, String message) {
+        AuditLog log = AuditLog.builder()
+                .ticket(ticket)
+                .message(message)
+                .timestamp(LocalDateTime.now())
+                .build();
+        auditLogRepository.save(log);
+    }
+}
+
+
+--- File: src\main\java\ticketmgmt\service\FileStorageService.java ---
+package ticketmgmt.service;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import ticketmgmt.model.LogFile;
+import ticketmgmt.model.Ticket;
+import ticketmgmt.repository.LogFileRepository;
+import ticketmgmt.repository.TicketRepository;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class FileStorageService {
+
+    private static final String UPLOAD_DIR = "uploads";
+
+    private final TicketRepository ticketRepository;
+    private final LogFileRepository logFileRepository;
+
+    /**
+     * Save a file to the local file system.
+     *
+     * @param file MultipartFile uploaded from frontend/Postman
+     * @return the stored file's full path as String
+     * @throws IOException if file can't be saved
+     */
+    public String saveFile(MultipartFile file) throws IOException {
+        Path uploadPath = Paths.get(UPLOAD_DIR);
+
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        Path filePath = uploadPath.resolve(filename);
+        file.transferTo(filePath.toFile());
+
+        return filePath.toString();
+    }
+
+    /**
+     * Save a file and associate it with a specific ticket.
+     *
+     * @param ticketId The ID of the ticket to attach the file to
+     * @param filePath Full path of the uploaded file
+     */
+    @Transactional
+    public void attachToTicket(Integer ticketId, String filePath) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        LogFile logFile = LogFile.builder()
+                .filePath(filePath)
+                .ticket(ticket)
+                .build();
+
+        logFileRepository.save(logFile);
+    }
+
+    /**
+     * Get all file paths attached to a ticket.
+     *
+     * @param ticketId The ticket ID
+     * @return List of file paths as Strings
+     */
+    public List<String> getFilesByTicket(Integer ticketId) {
+        return logFileRepository.findByTicketId(ticketId)
+                .stream()
+                .map(LogFile::getFilePath)
+                .collect(Collectors.toList());
+    }
+}
+
+
+--- File: src\main\java\ticketmgmt\service\TicketService.java ---
+package ticketmgmt.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import ticketmgmt.model.*;
+import ticketmgmt.repository.CustomerRepository;
+import ticketmgmt.repository.EngineerRepository;
+import ticketmgmt.repository.TicketRepository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+public class TicketService {
+
+    private final TicketRepository ticketRepository;
+    private final CustomerRepository customerRepository;
+    private final EngineerRepository engineerRepository;
+    private final AuditLogService auditLogService;
+
+    // Create new ticket and associate with a customer
+    public Ticket createTicket(String customerName, String issue, TicketPriority priority) {
+        Customer customer = customerRepository.findByName(customerName)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        Ticket ticket = Ticket.builder()
+                //.customerName(customerName)
+                .issueDescription(issue)
+                .ticketStatus(TicketStatus.OPEN)
+                .priority(priority)
+                .ticketResponse("Ticket created")
+                .customer(customer)
+                .build();
+
+        Ticket savedTicket = ticketRepository.save(ticket);
+        auditLogService.log(savedTicket, "Ticket created");
+        return savedTicket;
+    }
+
+    // Get a ticket by ID
+    public Optional<Ticket> getTicketById(Integer ticketId) {
+        return ticketRepository.findById(ticketId);
+    }
+
+    // Engineer chooses (claims) a ticket
+    public Ticket assignTicketToEngineer(Integer ticketId, Integer engineerId) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+        Engineer engineer = engineerRepository.findById(engineerId)
+                .orElseThrow(() -> new RuntimeException("Engineer not found"));
+
+        ticket.setAssignedEngineer(engineer);
+        auditLogService.log(ticket, "Assigned to engineer: " + engineer.getName());
+        return ticketRepository.save(ticket);
+    }
+
+    // Engineer removes themselves from ticket
+    public Ticket unassignEngineer(Integer ticketId) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        ticket.setAssignedEngineer(null);
+        auditLogService.log(ticket, "Unassigned engineer");
+        return ticketRepository.save(ticket);
+    }
+
+    // Get all tickets
+    public List<Ticket> getAllTickets() {
+        return ticketRepository.findAll();
+    }
+}
+
+
+--- File: src\main\resources\application.properties ---
+# Database Configuration
+spring.datasource.url=jdbc:mysql://localhost:3306/ticketmgmt
+spring.datasource.username=root
+spring.datasource.password=root@1234
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# JPA Config
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+spring.jpa.properties.hibernate.format_sql=true
+
+# Server
+server.port=8080
+
+# File Upload (optional)
+file.upload-dir=uploads
+
+# Logging
+debug=false
+logging.level.org.hibernate.SQL=DEBUG
+logging.level.org.springframework.context=INFO
+
+spring.main.allow-bean-definition-overriding=true
+
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=10MB
+
+
+--- File: src\test\java\ticketmgmt\TicketMgmtApplicationTests.java ---
+package ticketmgmt;
+
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class TicketMgmtApplicationTests {
+
+    @Test
+    void contextLoads() {
+    }
+
+}
+
+--- File: target\classes\application.properties ---
+# Database Configuration
+spring.datasource.url=jdbc:mysql://localhost:3306/ticketmgmt
+spring.datasource.username=root
+spring.datasource.password=root@1234
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# JPA Config
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+spring.jpa.properties.hibernate.format_sql=true
+
+# Server
+server.port=8080
+
+# File Upload (optional)
+file.upload-dir=uploads
+
+# Logging
+debug=false
+logging.level.org.hibernate.SQL=DEBUG
+logging.level.org.springframework.context=INFO
+
+spring.main.allow-bean-definition-overriding=true
+
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=10MB
