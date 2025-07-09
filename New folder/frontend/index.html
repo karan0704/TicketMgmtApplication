@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Management System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-ticket-alt"></i> Ticket Management System</h1>
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="App.Handlers.showTab('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </button>
+                <button class="nav-tab" onclick="App.Handlers.showTab('customers')">
+                    <i class="fas fa-users"></i> Customers
+                </button>
+                <button class="nav-tab" onclick="App.Handlers.showTab('engineers')">
+                    <i class="fas fa-user-tie"></i> Engineers
+                </button>
+                <button class="nav-tab" onclick="App.Handlers.showTab('tickets')">
+                    <i class="fas fa-ticket-alt"></i> Tickets
+                </button>
+                <button class="nav-tab" onclick="App.Handlers.showTab('files')">
+                    <i class="fas fa-file-upload"></i> Files
+                </button>
+            </div>
+        </div>
+
+        <div class="alert alert-success" id="successAlert"></div>
+        <div class="alert alert-error" id="errorAlert"></div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="two-column">
+                <div class="card">
+                    <h3><i class="fas fa-chart-bar"></i> Statistics</h3>
+                    <div id="statsContainer">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            Loading statistics...
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-clock"></i> Recent Activity</h3>
+                    <div id="recentActivity">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            Loading recent activity...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customers Tab -->
+        <div id="customers" class="tab-content">
+            <div class="two-column">
+                <div class="card">
+                    <h3><i class="fas fa-user-plus"></i> Add Customer</h3>
+                    <form id="customerForm">
+                        <div class="form-group">
+                            <label for="customerName">Name *</label>
+                            <input type="text" id="customerName" name="name" required>
+                            <div class="error-message" id="customerNameError"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="customerEmail">Email *</label>
+                            <input type="email" id="customerEmail" name="email" required>
+                            <div class="error-message" id="customerEmailError"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="customerPhone">Phone Number</label>
+                            <input type="tel" id="customerPhone" name="phoneNumber">
+                            <div class="error-message" id="customerPhoneError"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="customerCompany">Company Name *</label>
+                            <input type="text" id="customerCompany" name="companyName" required>
+                            <div class="error-message" id="customerCompanyError"></div>
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-plus"></i> Add Customer
+                        </button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-users"></i> Customer List</h3>
+                    <div id="customersList">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            Loading customers...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Engineers Tab -->
+        <div id="engineers" class="tab-content">
+            <div class="two-column">
+                <div class="card">
+                    <h3><i class="fas fa-user-tie"></i> Add Engineer</h3>
+                    <form id="engineerForm">
+                        <div class="form-group">
+                            <label for="engineerName">Name *</label>
+                            <input type="text" id="engineerName" name="name" required>
+                            <div class="error-message" id="engineerNameError"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="engineerEmail">Email *</label>
+                            <input type="email" id="engineerEmail" name="email" required>
+                            <div class="error-message" id="engineerEmailError"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="engineerDesignation">Designation *</label>
+                            <input type="text" id="engineerDesignation" name="designation" required>
+                            <div class="error-message" id="engineerDesignationError"></div>
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-plus"></i> Add Engineer
+                        </button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-user-tie"></i> Engineer List</h3>
+                    <div id="engineersList">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            Loading engineers...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tickets Tab -->
+        <div id="tickets" class="tab-content">
+            <div class="card">
+                <h3><i class="fas fa-ticket-alt"></i> Create New Ticket</h3>
+                <form id="ticketForm">
+                    <div class="two-column">
+                        <div class="form-group">
+                            <label for="ticketCustomer">Customer *</label>
+                            <select id="ticketCustomer" name="customerName" required>
+                                <option value="">Select Customer</option>
+                            </select>
+                            <div class="error-message" id="ticketCustomerError"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="ticketPriority">Priority *</label>
+                            <select id="ticketPriority" name="priority" required>
+                                <option value="">Select Priority</option>
+                                <option value="LOW">Low</option>
+                                <option value="MEDIUM">Medium</option>
+                                <option value="HIGH">High</option>
+                                <option value="CRITICAL">Critical</option>
+                            </select>
+                            <div class="error-message" id="ticketPriorityError"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="ticketIssue">Issue Description *</label>
+                        <textarea id="ticketIssue" name="issue" rows="4" required></textarea>
+                        <div class="error-message" id="ticketIssueError"></div>
+                    </div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Create Ticket
+                    </button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3><i class="fas fa-list"></i> All Tickets</h3>
+                <div id="ticketsList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading tickets...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Files Tab -->
+        <div id="files" class="tab-content">
+            <div class="card">
+                <h3><i class="fas fa-file-upload"></i> Upload File</h3>
+                <form id="fileUploadForm">
+                    <div class="form-group">
+                        <label for="fileTicketId">Ticket ID *</label>
+                        <input type="number" id="fileTicketId" name="ticketId" required>
+                        <div class="error-message" id="fileTicketIdError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>File *</label>
+                        <div class="file-upload" id="fileUploadArea">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: #ddd; margin-bottom: 10px;"></i>
+                            <p>Drag and drop a file here or <strong>click to browse</strong></p>
+                            <input type="file" id="fileInput" name="file" style="display: none;" required>
+                        </div>
+                        <div class="error-message" id="fileError"></div>
+                        <div class="success-message" id="fileSuccess"></div>
+                    </div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-upload"></i> Upload File
+                    </button>
+                </form>
+            </div>
+            <div class="card">
+                <h3><i class="fas fa-folder-open"></i> Files by Ticket</h3>
+                <div class="form-group">
+                    <label for="viewFilesTicketId">Enter Ticket ID to view files:</label>
+                    <input type="number" id="viewFilesTicketId" placeholder="Ticket ID">
+                    <button class="btn btn-secondary" onclick="App.Handlers.viewFilesForTicket()">View Files</button>
+                </div>
+                <div id="ticketFilesList">
+                    <p class="loading">Enter a Ticket ID to view associated files.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Ticket Details -->
+    <div id="ticketDetailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="App.UI.closeModal('ticketDetailsModal')">&times;</span>
+            <h2 id="ticketDetailsModalTitle">Ticket Details</h2>
+            <div id="ticketDetailsModalContent"></div>
+        </div>
+    </div>
+
+    <!-- Modal for Assign Engineer -->
+    <div id="assignEngineerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="App.UI.closeModal('assignEngineerModal')">&times;</span>
+            <h2 id="assignEngineerModalTitle">Assign Engineer</h2>
+            <div id="assignEngineerModalContent"></div>
+        </div>
+    </div>
+
+    <!-- Modal for Change Status -->
+    <div id="changeStatusModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="App.UI.closeModal('changeStatusModal')">&times;</span>
+            <h2 id="changeStatusModalTitle">Change Ticket Status</h2>
+            <div id="changeStatusModalContent"></div>
+        </div>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
