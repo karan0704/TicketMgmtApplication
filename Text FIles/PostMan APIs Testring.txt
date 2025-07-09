@@ -31,3 +31,17 @@ POST http://localhost:8080/api/customers
   "phoneNumber": "9876543210",
   "companyName": "Karan Pvt Ltd"
 }
+-------------------------------------------------------------
+http://localhost:8080/api/auth/register
+{
+  "username": "abhijeet",
+  "email": "abhi@straltoglobal.in",
+  "password": "Pass123",
+  "role": "ROLE_ENGINEER"
+}
+{
+    "role": "ROLE_ENGINEER",
+    "message": "User registered successfully",
+    "username": "abhijeet"
+}
+-------------------------------------------------------------

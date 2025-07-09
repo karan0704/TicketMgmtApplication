@@ -1,0 +1,176 @@
+.ticket-dashboard {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .ticket-dashboard {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Ticket Form Styles */
+.ticket-form-container {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ticket-form {
+    margin-top: 1rem;
+}
+
+.ticket-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.ticket-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #555;
+    font-weight: 500;
+}
+
+.ticket-form input,
+.ticket-form textarea,
+.ticket-form select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.ticket-form input:focus,
+.ticket-form textarea:focus,
+.ticket-form select:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Tickets List Styles */
+.tickets-list-container {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tickets-list {
+    margin-top: 1rem;
+}
+
+.ticket-card {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: box-shadow 0.3s ease;
+}
+
+.ticket-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ticket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.ticket-header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.priority {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.priority-low {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.priority-medium {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.priority-high {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.priority-critical {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.ticket-body {
+    margin-bottom: 1rem;
+}
+
+.ticket-body p {
+    margin: 0.5rem 0;
+}
+
+.ticket-body .customer span,
+.ticket-body .engineer span {
+    font-weight: 500;
+    color: #007bff;
+}
+
+.ticket-body .issue {
+    color: #666;
+    line-height: 1.5;
+}
+
+.ticket-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+.no-tickets {
+    text-align: center;
+    color: #666;
+    padding: 2rem;
+    font-style: italic;
+}
+
+.error {
+    color: #dc3545;
+    text-align: center;
+    padding: 1rem;
+}
+
+/* Loading Spinner Animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.spinner {
+    margin: 2rem auto;
+    display: block;
+}

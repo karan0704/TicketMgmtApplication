@@ -1,0 +1,26 @@
+frontend/
+├── index.html
+├── assets/
+│   ├── images/
+│   ├── fonts/
+│   └── icons/
+├── css/
+│   ├── main.css            # Global styles
+│   └── reset.css           # CSS reset or base
+├── js/
+│   ├── app.js              # Entry point (optional)
+│   ├── utils/              # Helper functions
+│   │   └── domUtils.js
+│   ├── services/           # API calls or backend integration
+│   │   └── userService.js
+│   └── features/           # Grouped by features
+│       ├── auth/
+│       │   ├── login.js
+│       │   ├── register.js
+│       │   └── auth.css
+│       ├── dashboard/
+│       │   ├── dashboard.js
+│       │   └── dashboard.css
+│       └── profile/
+│           ├── profile.js
+│           └── profile.css

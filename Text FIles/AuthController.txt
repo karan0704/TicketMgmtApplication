@@ -31,15 +31,15 @@ public class AuthController {
                 error.put("error", "Username already exists");
                 return ResponseEntity.badRequest().body(error);
             }
-
+            
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             AppUser savedUser = userRepository.save(user);
-
+            
             Map<String, Object> response = new HashMap<>();
             response.put("message", "User registered successfully");
             response.put("username", savedUser.getUsername());
             response.put("role", savedUser.getRole().name());
-
+            
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
@@ -54,16 +54,16 @@ public class AuthController {
             Authentication auth = authManager.authenticate(
                     new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(auth);
-
+            
             AppUser loggedInUser = userRepository.findByUsername(user.getUsername())
                     .orElseThrow(() -> new RuntimeException("User not found"));
-
+            
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Login successful");
             response.put("username", loggedInUser.getUsername());
             response.put("role", loggedInUser.getRole().name());
             response.put("userId", loggedInUser.getId());
-
+            
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
@@ -71,7 +71,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(error);
         }
     }
-
+    
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         SecurityContextHolder.getContext().setAuthentication(null);

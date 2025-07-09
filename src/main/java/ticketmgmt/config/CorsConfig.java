@@ -14,11 +14,18 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        // IMPORTANT: Added "http://localhost:8000" to allow your Python server frontend
-                        // "null" is also included for direct file system access, though http.server is better
-                        .allowedOrigins("http://localhost:4200", "http://localhost:8000", "null")
+                        .allowedOrigins(
+                                "http://localhost:4200",
+                                "http://localhost:8000",
+                                "http://127.0.0.1:5500",
+                                "file://",
+                                "null"
+                        )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*");
+                        .allowedHeaders("*")
+                        .exposedHeaders("Authorization")
+                        .allowCredentials(true)
+                        .maxAge(3600);
             }
         };
     }

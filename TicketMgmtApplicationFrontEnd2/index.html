@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Management System</title>
+    <!-- Link to Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="font-sans bg-gray-100 text-gray-900 min-h-screen flex flex-col">
+
+    <!-- Header and Navigation -->
+    <header class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white shadow-lg py-4">
+        <nav class="container mx-auto px-4 flex flex-wrap justify-between items-center">
+            <h1 class="text-3xl font-extrabold tracking-tight">TicketMaster</h1>
+            <ul class="flex flex-wrap space-x-6 mt-2 md:mt-0">
+                <li>
+                    <button id="nav-home" class="text-lg font-medium hover:text-blue-200 transition-colors duration-200">
+                        Home
+                    </button>
+                </li>
+                <li>
+                    <button id="nav-customers" class="text-lg font-medium hover:text-blue-200 transition-colors duration-200">
+                        Customers
+                    </button>
+                </li>
+                <li>
+                    <button id="nav-engineers" class="text-lg font-medium hover:text-blue-200 transition-colors duration-200">
+                        Engineers
+                    </button>
+                </li>
+                <li>
+                    <button id="nav-tickets" class="text-lg font-medium hover:text-blue-200 transition-colors duration-200">
+                        Tickets
+                    </button>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="container mx-auto p-6 mt-8 flex-grow">
+        <!-- Home View -->
+        <div id="home-view" class="p-6 bg-white rounded-lg shadow-xl text-center view-section">
+            <h2 class="text-3xl font-bold mb-4 text-gray-800">Welcome to Ticket Management App</h2>
+            <p class="text-lg text-gray-600 mb-6">
+                Use the navigation above to manage customers, engineers, and tickets.
+            </p>
+            <div class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4">
+                <button id="home-manage-customers" class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-lg text-lg">
+                    Manage Customers
+                </button>
+                <button id="home-manage-engineers" class="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-300 shadow-lg text-lg">
+                    Manage Engineers
+                </button>
+                <button id="home-manage-tickets" class="px-8 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-300 shadow-lg text-lg">
+                    Manage Tickets
+                </button>
+            </div>
+        </div>
+
+        <!-- Customer List View -->
+        <div id="customer-list-view" class="p-6 bg-white rounded-lg shadow-xl view-section hidden">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Customers</h2>
+            <button id="create-customer-btn" class="mb-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-md">
+                Create New Customer
+            </button>
+            <div id="customer-list-container" class="overflow-x-auto">
+                <!-- Customer list table will be rendered here by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Create Customer Form View -->
+        <div id="create-customer-view" class="p-6 bg-white rounded-lg shadow-xl max-w-md mx-auto view-section hidden">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Create New Customer</h2>
+            <form id="customer-form" class="space-y-4">
+                <div>
+                    <label for="customer-name" class="block text-sm font-medium text-gray-700">Name</label>
+                    <input type="text" id="customer-name" name="name" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
+                </div>
+                <div>
+                    <label for="customer-email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="customer-email" name="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
+                </div>
+                <div>
+                    <label for="customer-phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
+                    <input type="text" id="customer-phone" name="phoneNumber" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
+                </div>
+                <div>
+                    <label for="customer-company" class="block text-sm font-medium text-gray-700">Company Name</label>
+                    <input type="text" id="customer-company" name="companyName" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" id="cancel-create-customer" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md shadow-sm text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Create Customer
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Engineer List View -->
+        <div id="engineer-list-view" class="p-6 bg-white rounded-lg shadow-xl view-section hidden">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Engineers</h2>
+            <button id="create-engineer-btn" class="mb-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-md">
+                Add New Engineer
+            </button>
+            <div id="engineer-list-container" class="overflow-x-auto">
+                <!-- Engineer list table will be rendered here by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Create Engineer Form View -->
+        <div id="create-engineer-view" class="p-6 bg-white rounded-lg shadow-xl max-w-md mx-auto view-section hidden">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Add New Engineer</h2>
+            <form id="engineer-form" class="space-y-4">
+                <div>
+                    <label for="engineer-name" class="block text-sm font-medium text-gray-700">Name</label>
+                    <input type="text" id="engineer-name" name="name" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
+                </div>
+                <div>
+                    <label for="engineer-email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="engineer-email" name="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
+                </div>
+                <div>
+                    <label for="engineer-designation" class="block text-sm font-medium text-gray-700">Designation</label>
+                    <input type="text" id="engineer-designation" name="designation" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" id="cancel-create-engineer" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md shadow-sm text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Add Engineer
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Ticket List View -->
+        <div id="ticket-list-view" class="p-6 bg-white rounded-lg shadow-xl view-section hidden">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Tickets</h2>
+            <button id="create-ticket-btn" class="mb-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-md">
+                Create New Ticket
+            </button>
+            <div id="ticket-list-container" class="overflow-x-auto">
+                <!-- Ticket list table will be rendered here by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Create Ticket Form View -->
+        <div id="create-ticket-view" class="p-6 bg-white rounded-lg shadow-xl max-w-md mx-auto view-section hidden">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Create New Ticket</h2>
+            <form id="ticket-form" class="space-y-4">
+                <div>
+                    <label for="ticket-customer-name" class="block text-sm font-medium text-gray-700">Customer Name</label>
+                    <input type="text" id="ticket-customer-name" name="customerName" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
+                </div>
+                <div>
+                    <label for="ticket-issue" class="block text-sm font-medium text-gray-700">Issue Description</label>
+                    <textarea id="ticket-issue" name="issue" required rows="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></textarea>
+                </div>
+                <div>
+                    <label for="ticket-priority" class="block text-sm font-medium text-gray-700">Priority</label>
+                    <select id="ticket-priority" name="priority" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        <!-- Options will be populated by JavaScript -->
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" id="cancel-create-ticket" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md shadow-sm text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Create Ticket
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Ticket Detail View -->
+        <div id="ticket-detail-view" class="p-6 bg-white rounded-lg shadow-xl view-section hidden">
+            <!-- Ticket details will be rendered here by JavaScript -->
+        </div>
+    </main>
+
+    <!-- Message Box and Loading Spinner (Global UI) -->
+    <div id="message-box" class="fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white z-50 hidden"></div>
+    <div id="loading-spinner" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-40 hidden">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+    </div>
+
+    <!-- JavaScript files (order matters for dependencies) -->
+    <script src="models.js"></script>
+    <script src="utils.js"></script>
+    <script src="api.js"></script>
+    <script src="customer.js"></script>
+    <script src="engineer.js"></script>
+    <script src="ticket.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

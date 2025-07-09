@@ -127,8 +127,6 @@ public class SecurityConfig {
                                 "/api/files/**"
                         ).permitAll()
                         .anyRequest().authenticated()
-                ).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-
                 );
 
         return http.build();

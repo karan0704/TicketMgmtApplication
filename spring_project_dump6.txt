@@ -55,18 +55,11 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins(
-                                "http://localhost:4200",
-                                "http://localhost:8000",
-                                "http://127.0.0.1:5500",
-                                "file://",
-                                "null"
-                        )
+                        // IMPORTANT: Added "http://localhost:8000" to allow your Python server frontend
+                        // "null" is also included for direct file system access, though http.server is better
+                        .allowedOrigins("http://localhost:4200", "http://localhost:8000", "null")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
-                        .exposedHeaders("Authorization")
-                        .allowCredentials(true)
-                        .maxAge(3600);
+                        .allowedHeaders("*");
             }
         };
     }
@@ -94,63 +87,31 @@ package ticketmgmt.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.context.annotation.Configuration;import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/auth/**",
-                                "/error",
-                                "/api/public/**",
-                                "/api/tickets/**",
-                                "/api/users/**",
-                                "/api/files/**"
+                        .requestMatchers("/api/auth/**", "/error","/api/public/**"
+                                //"/api/**"
                         ).permitAll()
                         .anyRequest().authenticated()
-                ).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-
                 );
 
         return http.build();
-    }
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:4200",
-                "http://localhost:8000",
-                "http://127.0.0.1:5500",
-                "file://",
-                "null"
-        ));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
-        
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
     }
 }
 
@@ -158,18 +119,19 @@ public class SecurityConfig {
 package ticketmgmt.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ticketmgmt.model.AppUser;
 import ticketmgmt.repository.AppUserRepository;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -181,60 +143,17 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody AppUser user) {
-        try {
-            if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "Username already exists");
-                return ResponseEntity.badRequest().body(error);
-            }
-
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            AppUser savedUser = userRepository.save(user);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "User registered successfully");
-            response.put("username", savedUser.getUsername());
-            response.put("role", savedUser.getRole().name());
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "Registration failed");
-            return ResponseEntity.badRequest().body(error);
-        }
+    public ResponseEntity<AppUser> register(@RequestBody AppUser user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return ResponseEntity.ok(userRepository.save(user));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AppUser user) {
-        try {
-            Authentication auth = authManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
-            SecurityContextHolder.getContext().setAuthentication(auth);
-
-            AppUser loggedInUser = userRepository.findByUsername(user.getUsername())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Login successful");
-            response.put("username", loggedInUser.getUsername());
-            response.put("role", loggedInUser.getRole().name());
-            response.put("userId", loggedInUser.getId());
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "Invalid credentials");
-            return ResponseEntity.badRequest().body(error);
-        }
-    }
-
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
-        SecurityContextHolder.getContext().setAuthentication(null);
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Logged out successfully");
-        return ResponseEntity.ok(response);
+    public ResponseEntity<String> login(@RequestBody AppUser user) {
+        Authentication auth = authManager.authenticate(
+                new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        return ResponseEntity.ok("Login successful");
     }
 }
 
