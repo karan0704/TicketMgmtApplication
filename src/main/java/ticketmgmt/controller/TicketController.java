@@ -3,6 +3,7 @@ package ticketmgmt.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ticketmgmt.dto.TicketRequest;
 import ticketmgmt.model.Ticket;
 import ticketmgmt.model.TicketPriority;
 import ticketmgmt.service.TicketService;
@@ -18,10 +19,9 @@ public class TicketController {
     private final TicketService ticketService;
 
     @PostMapping("/create")
-    public ResponseEntity<Ticket> createTicket(@RequestParam String customerName,
-                                               @RequestParam String issue,
-                                               @RequestParam TicketPriority priority) {
-        Ticket created = ticketService.createTicket(customerName, issue, priority);
+    public ResponseEntity<Ticket> createTicket(//@RequestParam String customerName, @RequestParam String issue,@RequestParam TicketPriority priority
+                                               @RequestBody TicketRequest request) {
+        Ticket created = ticketService.createTicket(request.getCustomerName(), request.getIssue(), request.getPriority());
         return ResponseEntity.ok(created);
     }
 

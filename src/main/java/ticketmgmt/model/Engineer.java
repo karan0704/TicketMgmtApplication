@@ -1,7 +1,12 @@
 package ticketmgmt.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
 @Entity
@@ -20,5 +25,6 @@ public class Engineer {
     private String designation;
 
     @OneToMany(mappedBy = "assignedEngineer", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Ticket> assignedTickets;
 }

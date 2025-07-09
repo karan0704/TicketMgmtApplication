@@ -7,7 +7,7 @@ project_root = r"D:\Learning Projects\TicketMgmtApplication"
 output_file = "spring_project_dump.txt"
 
 # 🎯 File extensions to include
-allowed_extensions = {".java", ".xml", ".properties", ".yml", ".yaml", ".gradle", ".txt"}
+allowed_extensions = {".java", ".properties"}
 
 with open(output_file, "w", encoding="utf-8") as out_file:
     for root, _, files in os.walk(project_root):

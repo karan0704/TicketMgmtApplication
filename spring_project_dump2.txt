@@ -28,7 +28,7 @@ package ticketmgmt;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(scanBasePackages = "ticketmgmt")
+@SpringBootApplication
 public class TicketMgmtApplication {
 
     public static void main(String[] args) {
@@ -87,37 +87,53 @@ package ticketmgmt.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
-
+import ticketmgmt.service.AppUserDetailsService;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
-
+    private final AppUserDetailsService userDetailsService;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/error", "/api/public/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
                         .anyRequest().authenticated()
-                );
-
+                ).httpBasic(Customizer.withDefaults()); // <- Add this
         return http.build();
+
+    }
+
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return userDetailsService;
     }
 }
+
 
 --- File: src\main\java\ticketmgmt\controller\AuthController.java ---
 package ticketmgmt.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -264,7 +280,6 @@ package ticketmgmt.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ticketmgmt.dto.TicketRequest;
 import ticketmgmt.model.Ticket;
 import ticketmgmt.model.TicketPriority;
 import ticketmgmt.service.TicketService;
@@ -280,9 +295,10 @@ public class TicketController {
     private final TicketService ticketService;
 
     @PostMapping("/create")
-    public ResponseEntity<Ticket> createTicket(//@RequestParam String customerName, @RequestParam String issue,@RequestParam TicketPriority priority
-                                               @RequestBody TicketRequest request) {
-        Ticket created = ticketService.createTicket(request.getCustomerName(), request.getIssue(), request.getPriority());
+    public ResponseEntity<Ticket> createTicket(@RequestParam String customerName,
+                                               @RequestParam String issue,
+                                               @RequestParam TicketPriority priority) {
+        Ticket created = ticketService.createTicket(customerName, issue, priority);
         return ResponseEntity.ok(created);
     }
 
@@ -309,21 +325,6 @@ public class TicketController {
 }
 
 
---- File: src\main\java\ticketmgmt\dto\TicketRequest.java ---
-package ticketmgmt.dto;
-
-import lombok.Data;
-import ticketmgmt.model.TicketPriority;
-
-@Data
-
-public class TicketRequest {
-    private String customerName;
-    private String issue;
-    private TicketPriority priority;
-}
-
-
 --- File: src\main\java\ticketmgmt\model\AppUser.java ---
 package ticketmgmt.model;
 
@@ -346,11 +347,11 @@ public class AppUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(unique = true)
+
     private String username;
 
     private String email;
-
+    
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -359,7 +360,7 @@ public class AppUser {
     private List<Ticket> tickets;
 
     public enum Role {
-        ROLE_CUSTOMER, ROLE_ENGINEER
+        CUSTOMER, ENGINEER
     }
 }
 
@@ -434,7 +435,6 @@ public class Customer {
 --- File: src\main\java\ticketmgmt\model\Engineer.java ---
 package ticketmgmt.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -459,7 +459,6 @@ public class Engineer {
     private String designation;
 
     @OneToMany(mappedBy = "assignedEngineer", cascade = CascadeType.ALL)
-    @JsonIgnore
     private List<Ticket> assignedTickets;
 }
 
@@ -547,7 +546,7 @@ public class Ticket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // private String customerName;
+    private String customerName;
     private String issueDescription;
 
     @Enumerated(EnumType.STRING)
@@ -558,14 +557,13 @@ public class Ticket {
 
     private String ticketResponse;
 
-    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+   @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LogFile> logFiles;
 
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AuditLog> auditLogs;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
     @JsonIgnore
     private AppUser user;
 
@@ -682,10 +680,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Integer> {
 package ticketmgmt.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -695,7 +689,6 @@ import ticketmgmt.repository.AppUserRepository;
 
 @Service
 @RequiredArgsConstructor
-@ComponentScan("ticketmgmt.repository")
 public class AppUserDetailsService implements UserDetailsService {
 
     private final AppUserRepository repository;
@@ -705,26 +698,12 @@ public class AppUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         AppUser user = repository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
-        System.out.println("User loaded: " + user.getUsername() + ", Role: " + user.getRole());
-
-        String role = user.getRole().name();
-        if (role.startsWith("ROLE_")) {
-            role = role.substring(5);
-        }
-
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getUsername())
                 .password(user.getPassword())
-                .roles(role)
-                //.roles(user.getRole().name())
+                .roles(user.getRole().name())
                 .build();
     }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
-
 }
 
 
@@ -868,7 +847,7 @@ public class TicketService {
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
         Ticket ticket = Ticket.builder()
-                //.customerName(customerName)
+                .customerName(customerName)
                 .issueDescription(issue)
                 .ticketStatus(TicketStatus.OPEN)
                 .priority(priority)
@@ -936,18 +915,10 @@ file.upload-dir=uploads
 
 # Logging
 logging.level.org.hibernate.SQL=DEBUG
-logging.level.org.springframework.security=DEBUG
-logging.level.org.springframework.context=DEBUG
 
 
-spring.servlet.multipart.max-file-size=10MB
-spring.servlet.multipart.max-request-size=10MB
-
-
-
---- File: src\test\java\ticketmgmt\TicketMgmtApplicationTests.java ---
-package ticketmgmt;
-
+--- File: src\test\java\ticketmgmt\ticketmgmt\TicketMgmtApplicationTests.java ---
+package ticketmgmt.ticketmgmt;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -960,6 +931,7 @@ class TicketMgmtApplicationTests {
     }
 
 }
+
 
 --- File: target\classes\application.properties ---
 # Database Configuration
@@ -982,10 +954,3 @@ file.upload-dir=uploads
 
 # Logging
 logging.level.org.hibernate.SQL=DEBUG
-logging.level.org.springframework.security=DEBUG
-logging.level.org.springframework.context=DEBUG
-
-
-spring.servlet.multipart.max-file-size=10MB
-spring.servlet.multipart.max-request-size=10MB
-

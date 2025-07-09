@@ -3,9 +3,10 @@ package ticketmgmt.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ticketmgmt.model.*;
-import ticketmgmt.repository.*;
+import ticketmgmt.repository.CustomerRepository;
+import ticketmgmt.repository.EngineerRepository;
+import ticketmgmt.repository.TicketRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,7 +25,7 @@ public class TicketService {
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
         Ticket ticket = Ticket.builder()
-                .customerName(customerName)
+                //.customerName(customerName)
                 .issueDescription(issue)
                 .ticketStatus(TicketStatus.OPEN)
                 .priority(priority)
