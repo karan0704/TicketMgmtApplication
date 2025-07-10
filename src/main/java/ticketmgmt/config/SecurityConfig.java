@@ -1,6 +1,5 @@
 package ticketmgmt.config;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -8,32 +7,26 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import ticketmgmt.filter.JwtRequestFilter; // Import the new filter
 
 import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
-
-    private final JwtRequestFilter jwtRequestFilter; // Inject the JWT filter
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Make session stateless
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Permit all OPTIONS requests for CORS preflight
                         .requestMatchers(
                                 "/api/auth/**", // Allow authentication endpoints
                                 "/error",
@@ -41,8 +34,22 @@ public class SecurityConfig {
                         ).permitAll() // Public access
                         .anyRequest().authenticated() // All other requests require authentication
                 )
-                // Add the JWT filter before the UsernamePasswordAuthenticationFilter
-                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+                .formLogin(form -> form
+                        .loginPage("/api/auth/login")
+                        .loginProcessingUrl("/api/auth/login")
+                        .defaultSuccessUrl("/api/auth/login-success")
+                        .failureUrl("/api/auth/login-failure")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/api/auth/logout")
+                        .logoutSuccessUrl("/api/auth/logout-success")
+                        .permitAll()
+                )
+                .sessionManagement(session -> session
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(false)
+                );
 
         return http.build();
     }
@@ -53,23 +60,23 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:4200",
                 "http://localhost:8000",
-                "http://127.0.0.1:5500", // For your local HTML server
-                "file://", // For direct file access (less secure, but useful for local dev)
-                "null" // For certain local file protocols
+                "http://127.0.0.1:5500",
+                "http://localhost:5500",
+                "file://",
+                "null"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
-        configuration.setExposedHeaders(Arrays.asList("Authorization")); // Expose Authorization header
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 
-    // Expose AuthenticationManager as a Bean
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
+
 }
